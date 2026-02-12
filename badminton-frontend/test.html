@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Test</title>
+</head>
+<body>
+    <h1>Testing React App</h1>
+    <div id="test-output"></div>
+    
+    <script type="module">
+        const output = document.getElementById('test-output');
+        
+        // Test 1: Check if backend is accessible
+        fetch('http://localhost:5001/api/tournaments')
+            .then(r => r.json())
+            .then(data => {
+                output.innerHTML += `<p>✅ Backend API works! Tournaments: ${data.length}</p>`;
+            })
+            .catch(e => {
+                output.innerHTML += `<p>❌ Backend API error: ${e.message}</p>`;
+            });
+        
+        // Test 2: Try to import React
+        import('http://localhost:5173/@id/__x00__react')
+            .then(() => {
+                output.innerHTML += `<p>✅ React module loads</p>`;
+            })
+            .catch(e => {
+                output.innerHTML += `<p>❌ React module error: ${e.message}</p>`;
+            });
+    </script>
+</body>
+</html>
