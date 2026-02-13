@@ -13,7 +13,7 @@ import autoTable from 'jspdf-autotable';
 import { DateTime } from 'luxon';
 
 const TournamentDetail = ({ tournament, onClose }) => {
-    const { updateMatchResult, fetchTournaments, generateFixtures, clearMatchResult, currentUser } = useTournaments();
+    const { updateMatchResult, fetchTournaments, generateFixtures, generateFinals, clearMatchResult, currentUser } = useTournaments();
     const toast = useToast();
     const [selectedMatch, setSelectedMatch] = useState(null);
     const [scores, setScores] = useState({ a: '', b: '' });
@@ -74,7 +74,7 @@ const TournamentDetail = ({ tournament, onClose }) => {
             await generateFixtures(tournament.id);
             toast.success('Initial fixtures generated successfully!');
         } catch (error) {
-            toast.error('Failed to generate fixtures.');
+            toast.error(error.message || 'Failed to generate fixtures.');
         } finally {
             setIsGenerating(false);
         }
@@ -283,20 +283,20 @@ const TournamentDetail = ({ tournament, onClose }) => {
     }, [selectedMatch, tournament.id, updateMatchResult, toast]);
 
     const handleGenerateFinals = useCallback(async () => {
+        if (!allPoolMatchesCompleted) {
+            toast.warning('Please complete all pool matches before generating knockout finals.');
+            return;
+        }
         setGeneratingFinals(true);
         try {
-            const res = await fetch(`http://localhost:5001/api/tournaments/${tournament.id}/generate-finals`, { method: 'POST' });
-            if (res.ok) {
-                await fetchTournaments();
-                toast.success('Finals fixtures generated!');
-            } else {
-                toast.error('Failed to generate finals.');
-            }
+            await generateFinals(tournament.id);
+            toast.success('Knockout finals generated!');
         } catch (err) {
-            toast.error('Network error while generating finals.');
+            toast.error(err.message || 'Failed to generate finals.');
+        } finally {
+            setGeneratingFinals(false);
         }
-        setGeneratingFinals(false);
-    }, [tournament.id, fetchTournaments, toast]);
+    }, [tournament.id, generateFinals, toast, allPoolMatchesCompleted]);
 
     const findHeadToHead = useMemo(() => {
         if (!vsPlayers.p1 || !vsPlayers.p2) return null;

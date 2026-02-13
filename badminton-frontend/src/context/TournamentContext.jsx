@@ -127,12 +127,32 @@ export const TournamentProvider = ({ children }) => {
             });
             if (resp.ok) {
                 await fetchTournaments();
+                return true;
             } else {
                 const data = await resp.json();
-                console.error('Fixture generation failed:', data.error);
+                throw new Error(data.error || 'Fixture generation failed');
             }
         } catch (err) {
             console.error('Failed to generate fixtures:', err);
+            throw err;
+        }
+    };
+
+    const generateFinals = async (tournamentId) => {
+        try {
+            const resp = await fetch(`${API_URL}/tournaments/${tournamentId}/generate-finals`, {
+                method: 'POST',
+            });
+            if (resp.ok) {
+                await fetchTournaments();
+                return true;
+            } else {
+                const data = await resp.json();
+                throw new Error(data.error || 'Finals generation failed');
+            }
+        } catch (err) {
+            console.error('Failed to generate finals:', err);
+            throw err;
         }
     };
 
@@ -156,6 +176,7 @@ export const TournamentProvider = ({ children }) => {
             clearMatchResult,
             fetchTournaments,
             generateFixtures,
+            generateFinals,
             getActivityLogs,
             currentUser,
             setCurrentUser,
