@@ -12,9 +12,11 @@ const PORT = process.env.PORT || 5001;
 
 // Middleware
 app.use(cors({
-    origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : '*',
+    origin: process.env.ALLOWED_ORIGINS && process.env.ALLOWED_ORIGINS !== '*'
+        ? process.env.ALLOWED_ORIGINS.split(',')
+        : '*',
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
-    credentials: true
+    credentials: process.env.ALLOWED_ORIGINS && process.env.ALLOWED_ORIGINS !== '*'
 }));
 app.use(express.json());
 
@@ -126,8 +128,8 @@ app.post('/api/tournaments', async (req, res) => {
 
         res.status(201).json(tournament);
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Server error' });
+        console.error('Error in POST /api/tournaments:', err);
+        res.status(500).json({ error: 'Server error', details: err.message });
     }
 });
 

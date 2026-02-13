@@ -79,7 +79,7 @@ const ManagerDashboard = () => {
                 prizePool: ''
             });
         } catch (error) {
-            toast.error('Failed to create tournament. Please try again.');
+            toast.error(error.message || 'Failed to create tournament. Please try again.');
         } finally {
             setIsLoading(false);
         }

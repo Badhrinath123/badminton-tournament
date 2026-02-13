@@ -53,9 +53,14 @@ export const TournamentProvider = ({ children }) => {
             });
             if (resp.ok) {
                 await fetchTournaments();
+                return true;
+            } else {
+                const errData = await resp.json();
+                throw new Error(errData.details || errData.error || 'Failed to create tournament');
             }
         } catch (err) {
             console.error('Failed to add tournament:', err);
+            throw err;
         }
     };
 
