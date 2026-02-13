@@ -579,21 +579,23 @@ app.get('/api/tournaments/:id/activity', async (req, res) => {
     }
 });
 
-const initDbAndStart = async () => {
-    try {
-        // Only initialize if we are in production or if requested
-        console.log('Checking database status...');
-        const schema = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
-        await db.query(schema);
-        console.log('Database initialized/verified.');
+// Start server immediately
+const server = app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running on port ${PORT}`);
 
-        app.listen(PORT, '0.0.0.0', () => {
-            console.log(`Server running on port ${PORT}`);
-        });
-    } catch (err) {
-        console.error('Failed to start server:', err);
-        process.exit(1);
-    }
-};
+    // Initialize DB after server is up
+    const initDb = async () => {
+        try {
+            console.log('Verifying database schema...');
+            const schema = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
+            await db.query(schema);
+            console.log('Database schema verified/initialized.');
+        } catch (err) {
+            console.error('Database initialization warning (server still running):', err.message);
+        }
+    };
+    initDb();
+});
 
-initDbAndStart();
+// Basic health check for Render
+app.get('/health', (req, res) => res.status(200).send('OK'));
