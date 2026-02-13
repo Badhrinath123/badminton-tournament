@@ -3,6 +3,8 @@ const cors = require('cors');
 const db = require('./db');
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('./swagger');
+const fs = require('fs');
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
@@ -575,6 +577,21 @@ app.get('/api/tournaments/:id/activity', async (req, res) => {
     }
 });
 
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running on port ${PORT}`);
-});
+const initDbAndStart = async () => {
+    try {
+        // Only initialize if we are in production or if requested
+        console.log('Checking database status...');
+        const schema = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
+        await db.query(schema);
+        console.log('Database initialized/verified.');
+
+        app.listen(PORT, '0.0.0.0', () => {
+            console.log(`Server running on port ${PORT}`);
+        });
+    } catch (err) {
+        console.error('Failed to start server:', err);
+        process.exit(1);
+    }
+};
+
+initDbAndStart();
