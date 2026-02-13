@@ -9,6 +9,9 @@ CREATE TABLE IF NOT EXISTS tournaments (
     manager_email TEXT,
     team_count INTEGER DEFAULT 8,
     status TEXT DEFAULT 'active',
+    rules TEXT,
+    entry_fee TEXT,
+    prize_pool TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -37,5 +40,14 @@ CREATE TABLE IF NOT EXISTS matches (
     next_match_side TEXT, -- 'A' or 'B'
     type TEXT, -- 'knockout' or 'pool'
     pool_index INTEGER,
+    scheduled_time TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS activity_log (
+    id SERIAL PRIMARY KEY,
+    tournament_id INTEGER REFERENCES tournaments(id) ON DELETE CASCADE,
+    action TEXT NOT NULL,
+    details TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
